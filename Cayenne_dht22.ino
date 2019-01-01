@@ -14,6 +14,8 @@ char username[] = "user";
 char password[] = "pass"; 
 char clientID[] = "id";
 
+uint32_t SLEEP_TIME = 900e6;
+
 unsigned long lastMillis = 0;
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -31,13 +33,18 @@ void loop() {
   Cayenne.loop();
 
   float humidity = dht.readHumidity();
-
   float temp = dht.readTemperature();
-    
-  Cayenne.virtualWrite(1, temp, TYPE_TEMPERATURE, UNIT_CELSIUS);
-  Cayenne.virtualWrite(2, humidity, TYPE_RELATIVE_HUMIDITY, UNIT_PERCENT);
-    
- }
+  
+  if (isnan(humidity) || isnan(temp)) { //Verifica que las lecturas son correctas
+    return;
+  }
+  else{
+    Cayenne.virtualWrite(1, temp, TYPE_TEMPERATURE, UNIT_CELSIUS);
+    Cayenne.virtualWrite(2, humidity, TYPE_RELATIVE_HUMIDITY, UNIT_PERCENT);
+  }
+  if (millis() >= 10000){        
+    ESP.deepSleep(SLEEP_TIME, WAKE_RF_DEFAULT);
+  } 
+}
 
- // todo - update   sleep mode
  // read - https://programarfacil.com/esp8266/proyectos-con-esp8266-iot/
